@@ -1,0 +1,11 @@
+directive @key(fields: String!) on OBJECT
+
+type User @key(fields: "id") {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+type Query {
+  user(id: ID!): User
+}
