@@ -4,7 +4,7 @@ metadata:
   name: minimal-subgraph-service
 spec:
   selector:
-    app: minimal-subgraph
+    app: user-subgraph
   ports:
     - protocol: TCP
       port: 80
