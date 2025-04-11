@@ -8,10 +8,7 @@ image:
   #version: "latest"
 
 # -- Add labels to all deployed resources
-commonLabels: 
-  app: router
-    app.kubernetes.io/name: router
-    app.kubernetes.io/instance: router
+commonLabels: {}
 
 deploymentStrategy: {}
 
@@ -54,7 +51,10 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-serviceAnnotations: {}
+serviceAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8088"
+  prometheus.io/path: "/metrics"
 
 podAnnotations: {}
 
@@ -187,10 +187,10 @@ global:
 
 # -- The name of the configmap to use for the router configuration. The key "config.yaml" is required in the configmap.
 # If this is set, the commonConfiguration section is ignored.
-existingConfigmap: ""
+existingConfigmap: "router-config"
 
 # -- Existing secret in the same namespace containing the graphApiToken. The secret key has to match with current secret.
-existingSecret: ""
+existingSecret: "router-secret"
 
 # Use this section to pass the graphApiToken or to configure simple settings.
 # -- You can use this to provide the router configuration via yaml. Values here have precedence over the configurations section.

@@ -1,0 +1,103 @@
+prometheus:
+  prometheusSpec:
+    # Scrape interval for Cosmo Router
+    scrapeInterval: "30s"
+    # Persistent storage for metrics
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+    # Alerting rules for Cosmo Router
+    additionalPrometheusRules:
+      - name: cosmo-router-alerts
+        groups:
+          - name: cosmo-router
+            rules:
+              # Alert if the service is down
+              - alert: CosmoRouterDown
+                expr: up{job="cosmo-router"} == 0
+                for: 5m
+                labels:
+                  severity: critical
+                annotations:
+                  summary: "Cosmo Router service is down"
+                  description: "The Cosmo Router service has been unreachable for more than 5 minutes."
+              # Alert if CPU usage is high (e.g., >80% of 1 CPU core over 5m)
+              - alert: CosmoRouterHighCPU
+                expr: rate(process_cpu_seconds_total{job="cosmo-router"}[5m]) * 100 > 80
+                for: 5m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Cosmo Router high CPU usage"
+                  description: "CPU usage for Cosmo Router exceeds 80% of a core for more than 5 minutes."
+              # Alert if memory usage is high (e.g., >500MB)
+              - alert: CosmoRouterHighMemory
+                expr: process_resident_memory_bytes{job="cosmo-router"} > 500e6
+                for: 5m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Cosmo Router high memory usage"
+                  description: "Memory usage for Cosmo Router exceeds 500MB for more than 5 minutes."
+              # Alert if goroutine count is high (e.g., >1000)
+              - alert: CosmoRouterHighGoroutines
+                expr: go_goroutines{job="cosmo-router"} > 1000
+                for: 5m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Cosmo Router high goroutine count"
+                  description: "Goroutine count for Cosmo Router exceeds 1000 for more than 5 minutes."
+    # Scrape config for Cosmo Router
+    additionalScrapeConfigs:
+      - job_name: cosmo-router
+        kubernetes_sd_configs:
+          - role: service
+            namespaces:
+              names:
+                - default
+        relabel_configs:
+          # Only scrape the router service
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: router
+          # Use port 8088 for metrics
+          - source_labels: [__meta_kubernetes_service_port_number]
+            action: keep
+            regex: 8088
+          # Map to internal service endpoint
+          - source_labels:
+              [__meta_kubernetes_service_name, __meta_kubernetes_namespace]
+            target_label: instance
+            replacement: $1.$2.svc.cluster.local:8088
+
+alertmanager:
+  enabled: true
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ["alertname", "job"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: default-receiver
+    receivers:
+      - name: default-receiver
+        # Example: Slack configuration (replace with your webhook)
+        slack_configs:
+          - api_url: "https://hooks.slack.com/services/XXX/YYY/ZZZ"
+            channel: "#alerts"
+            send_resolved: true
+            text: "<!channel> {{ .CommonAnnotations.summary }}: {{ .CommonAnnotations.description }}"
+    inhibit_rules:
+      - source_match:
+          severity: critical
+        target_match:
+          severity: warning
+        equal: ["alertname", "job"]
