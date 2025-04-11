@@ -37,6 +37,10 @@ resource "google_container_cluster" "this" {
     enabled = true
   }
 
+  private_cluster_config {
+    enable_private_nodes    = true
+    enable_private_endpoint = true
+  }
   node_config {
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     service_account = google_service_account.this.email
