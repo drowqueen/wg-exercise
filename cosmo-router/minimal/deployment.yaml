@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minimal-subrgraph
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minimal-subgraph
+  template:
+    metadata:
+      labels:
+        app: minimal-subgraph
+    spec:
+      containers:
+        - name: minimal-subgraph
+          image: gcr.io/cosmo-exercise/user-subgraph:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
