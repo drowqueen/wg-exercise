@@ -8,7 +8,10 @@ image:
   #version: "latest"
 
 # -- Add labels to all deployed resources
-commonLabels: {}
+commonLabels: 
+  app: router
+    app.kubernetes.io/name: router
+    app.kubernetes.io/instance: router
 
 deploymentStrategy: {}
 
