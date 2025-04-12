@@ -135,14 +135,14 @@ resource "google_service_account_iam_binding" "prometheus_identity" {
 # Sample app pod
 resource "kubernetes_pod" "app" {
   metadata {
-    name      = "app-pod"
+    name      = "testpod"
     namespace = "default"
   }
   spec {
     container {
       name    = "testpod"
       image   = "curlimages/curl:latest"
-      command = ["sh", "-c", "sleep 3600"] # Keep pod running for testing
+      command = ["sh", "-c", "sleep 3600"]
     }
     service_account_name = kubernetes_service_account.app.metadata.0.name
   }
