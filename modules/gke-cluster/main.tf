@@ -140,8 +140,9 @@ resource "kubernetes_pod" "app" {
   }
   spec {
     container {
-      name  = "app"
-      image = "nginx:latest"
+      name    = "testpod"
+      image   = "curlimages/curl:latest"
+      command = ["sh", "-c", "sleep 3600"] # Keep pod running for testing
     }
     service_account_name = kubernetes_service_account.app.metadata.0.name
   }
