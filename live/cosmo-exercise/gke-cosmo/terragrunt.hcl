@@ -17,7 +17,7 @@ dependency "vpc" {
 }
 
 inputs = {
-  name                       = "cosmo01"
+  name                       = "cosmo"
   account_id                 = "cosmo-sa"
   project_id                 = local.project_id
   location                   = "europe-west1"
@@ -25,4 +25,6 @@ inputs = {
   subnetwork                 = "subnet01"
   ip_range_pods              = "subnet01-pods"
   ip_range_services          = "subnet01-services"
+  deletion_protection        = false    # Set true for production
+#  master_ipv4_cidr_block     = "172.16.32.0/28"
 }

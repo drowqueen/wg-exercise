@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cosmo-router-alerts
+  namespace: monitoring
+spec:
+  groups:
+    - name: cosmo-router
+      rules:
+        - alert: CosmoRouterDown
+          expr: up{job="kubernetes-service-endpoints", service="router", namespace="default"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Cosmo Router service is down"
+            description: "The Cosmo Router service in namespace {{ $labels.namespace }} has been down for more than 5 minutes."
+        - alert: CosmoRouterHighLatency
+          expr: histogram_quantile(0.99, rate(router_request_duration_seconds_bucket{job="kubernetes-service-endpoints", service="router", namespace="default"}[5m])) > 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cosmo Router high scrape latency"
+            description: "The Cosmo Router service in namespace {{ $labels.namespace }} has 99th percentile request latency exceeding 1 second for over 5 minutes."
