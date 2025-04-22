@@ -27,3 +27,7 @@ GKE options like enable_autopilot, network, subnetwork, ip_allocation_policy, an
 I am unable to configure an ideal high-security gke cluster due to quota restraints and using free tier.
 Resource constraints are added to prometheus and cosmo router to get around the free tier quota restrictions.
 
+## How to deploy the apps
+
+See README under kubernetes folder.
+
